@@ -1055,17 +1055,23 @@ function drawNm() {
     nmX.beginPath();
     h.forEach(function (p, i) { var q = nmPx(p[0], p[1]); i ? nmX.lineTo(q[0], q[1]) : nmX.moveTo(q[0], q[1]); });
     nmX.closePath();
-    nmX.fillStyle = on ? hexA(siteBy[code].col, .30) : "rgba(113,113,113,.20)";
+    nmX.fillStyle = on ? hexA(siteBy[code].col, .30)
+                       : sel ? "rgba(113,113,113,.12)" : "rgba(113,113,113,.20)";
     nmX.fill();
     if (on) { nmX.strokeStyle = siteBy[code].col; nmX.lineWidth = 1.6; nmX.stroke(); }
   });
 
   G.nmds.points.forEach(function (p) {
     var q = nmPx(p.x, p.y), on = p.s === sel, r = on ? 6.4 : 4.6;
+    nmX.save();
+    /* same idea as the tank spotlight but gentler: the other sites fade back
+       rather than drop out, so the overall bioregion pattern stays legible */
+    if (sel && !on) nmX.globalAlpha = 0.42;
     nmX.fillStyle = "#fff";
     nmX.beginPath(); nmX.arc(q[0], q[1], r + 1.8, 0, 6.2832); nmX.fill();
     nmX.fillStyle = siteBy[p.s].col;
     nmX.beginPath(); nmX.arc(q[0], q[1], r, 0, 6.2832); nmX.fill();
+    nmX.restore();
   });
 
   nmX.fillStyle = "#65808e";
