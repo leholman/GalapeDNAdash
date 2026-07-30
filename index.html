@@ -82,7 +82,7 @@ h1{
 .stagehead .code{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;padding:3px 8px;border-radius:2px;font-weight:700}
 .stagehead h3{margin:0;font-family:var(--display);font-weight:400;font-size:21px;color:#f2f8fa;letter-spacing:-.01em}
 .stagehead .meta{font-family:var(--mono);font-size:10.5px;color:#7ba7bc;letter-spacing:.07em;text-transform:uppercase;margin-left:auto}
-#tank{display:block;width:100%;height:auto;background:#071f30}
+#tank{display:block;width:100%;height:auto;background:#071f30;touch-action:pan-y}
 .empty{padding:62px 20px 68px;text-align:center;color:#7ba7bc;font-family:var(--mono);font-size:12px;letter-spacing:.07em;line-height:1.9}
 .empty b{display:block;font-family:var(--display);font-size:21px;letter-spacing:0;color:#e8f3f7;text-transform:none;margin-bottom:9px;font-weight:400}
 
@@ -97,7 +97,7 @@ h1{
 .spot{width:100%;display:flex;gap:10px;align-items:flex-start;background:none;border:0;padding:0;margin:0;text-align:left;font:inherit;color:inherit;cursor:pointer;min-width:0}
 .spot>span{min-width:0;flex:1 1 auto;display:flex;flex-direction:column;align-items:flex-start}
 .spot:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.card canvas{flex:0 0 auto;width:62px;height:40px;image-rendering:pixelated}
+.card img.th{flex:0 0 auto;width:62px;height:40px;image-rendering:pixelated;display:block}
 .card .nm{display:block;max-width:100%;font-size:13.5px;color:var(--ink);line-height:1.25;font-style:italic;overflow-wrap:anywhere;hyphens:auto}
 .card .cn{display:block;max-width:100%;font-family:var(--mono);font-size:10px;color:var(--mute);letter-spacing:.02em;margin-top:3px;font-style:normal;overflow-wrap:anywhere}
 .card .bar{display:block;width:100%;height:3px;background:var(--line);margin-top:6px;border-radius:2px;overflow:hidden}
@@ -877,34 +877,72 @@ var lang = "en", T = STR.en;
 
 /* ─────────────────────────── sprite decoding ─────────────────────────── */
 var TH_W = 62, TH_H = 40;
-var cacheF = {}, cacheD = {};
-function fishSprite(name) {
-  if (cacheF[name]) return cacheF[name];
-  var m = SPRITES[name]; if (!m) return null;
-  var c = document.createElement("canvas"); c.width = m.w; c.height = m.h;
-  var x = c.getContext("2d");
-  for (var y = 0; y < m.h; y++) {
-    var row = m.px[y] || "";
-    for (var i = 0; i < row.length; i++) {
-      var ch = row[i]; if (ch === "0") continue;
-      x.fillStyle = m.pal[parseInt(ch, 36) - 1]; x.fillRect(i, y, 1, 1);
-    }
+/* One shared sprite atlas.
+   This page used to create a canvas per fish sprite, per decoration and per
+   species card — 242 of them. iOS Safari purges the backing store of the
+   oldest canvases once a page holds too many, and the map and the ordination
+   are the first two contexts created here, so on a phone they came back
+   blank while the tank (created late, repainted every frame) survived.
+   Everything is packed into one atlas now; the page holds 8 canvases. */
+var ATLAS = document.createElement("canvas"), AX = null, atlasAt = {};
+function buildAtlas() {
+  var items = [], k, g, w;
+  for (k in SPRITES) items.push({ key: "f:" + k, kind: "f", meta: SPRITES[k], w: SPRITES[k].w, h: SPRITES[k].h });
+  for (k in DEC.sprites) {
+    g = DEC.sprites[k]; w = 0;
+    g.px.forEach(function (r) { w = Math.max(w, r.length); });
+    items.push({ key: "d:" + k, kind: "d", grid: g, w: w, h: g.px.length });
   }
-  return (cacheF[name] = { cv: c, w: m.w, h: m.h });
-}
-function decorSprite(key) {
-  if (cacheD[key]) return cacheD[key];
-  var s = DEC.sprites[key]; if (!s) return null;
-  var w = 0; s.px.forEach(function (r) { w = Math.max(w, r.length); });
-  var c = document.createElement("canvas"); c.width = w; c.height = s.px.length;
-  var x = c.getContext("2d");
-  s.px.forEach(function (row, y) {
-    for (var i = 0; i < row.length; i++) {
-      var col = s.pal[row[i]]; if (!col) continue;
-      x.fillStyle = col; x.fillRect(i, y, 1, 1);
-    }
+  var AW = 1024, x = 0, y = 0, rowH = 0;
+  items.forEach(function (it) {
+    if (x + it.w + 1 > AW) { x = 0; y += rowH + 1; rowH = 0; }
+    it.x = x; it.y = y; x += it.w + 1; rowH = Math.max(rowH, it.h);
   });
-  return (cacheD[key] = { cv: c, w: w, h: s.px.length });
+  ATLAS.width = AW; ATLAS.height = y + rowH + 2;
+  AX = ATLAS.getContext("2d");
+  AX.imageSmoothingEnabled = false;
+  items.forEach(function (it) {
+    var i, j, row;
+    if (it.kind === "f") {
+      var m = it.meta;
+      for (j = 0; j < m.h; j++) {
+        row = m.px[j] || "";
+        for (i = 0; i < row.length; i++) {
+          if (row[i] === "0") continue;
+          AX.fillStyle = m.pal[parseInt(row[i], 36) - 1];
+          AX.fillRect(it.x + i, it.y + j, 1, 1);
+        }
+      }
+    } else {
+      for (j = 0; j < it.grid.px.length; j++) {
+        row = it.grid.px[j];
+        for (i = 0; i < row.length; i++) {
+          var c = it.grid.pal[row[i]]; if (!c) continue;
+          AX.fillStyle = c; AX.fillRect(it.x + i, it.y + j, 1, 1);
+        }
+      }
+    }
+    atlasAt[it.key] = { x: it.x, y: it.y, w: it.w, h: it.h };
+  });
+}
+function fishSprite(name) { return atlasAt["f:" + name] || null; }
+function decorSprite(name) { return atlasAt["d:" + name] || null; }
+
+/* species-card thumbnails: rendered once each into a data URL and served as
+   <img>, so the grid costs no canvases at all */
+var TMP = document.createElement("canvas"), thumbCache = {};
+function thumbURL(name) {
+  if (thumbCache[name] != null) return thumbCache[name];
+  var m = fishSprite(name); if (!m) return (thumbCache[name] = "");
+  var z = Math.max(1, Math.floor(Math.min(TH_W / m.w, TH_H / m.h)));
+  TMP.width = TH_W * 2; TMP.height = TH_H * 2;
+  var tx = TMP.getContext("2d");
+  tx.clearRect(0, 0, TMP.width, TMP.height);
+  tx.imageSmoothingEnabled = false;
+  var dw = m.w * z * 2, dh = m.h * z * 2;
+  tx.drawImage(ATLAS, m.x, m.y, m.w, m.h,
+               Math.round((TH_W * 2 - dw) / 2), Math.round((TH_H * 2 - dh) / 2), dw, dh);
+  return (thumbCache[name] = TMP.toDataURL());
 }
 function decorFor(code) {
   var found = [], seen = {};
@@ -928,12 +966,17 @@ function toPx(lon, lat) {
   return [(lon - B.xmin) / (B.xmax - B.xmin) * mapW,
           (1 - (lat - B.ymin) / (B.ymax - B.ymin)) * mapH];
 }
+var lastMapW = -1, lastMapDpr = -1;
 function sizeMap() {
   var r = mapC.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-  mapW = Math.max(280, r.width); mapH = Math.round(mapW / ASPECT);
+  var w = Math.max(280, Math.round(r.width));
+  if (w === lastMapW && dpr === lastMapDpr) return false;
+  lastMapW = w; lastMapDpr = dpr;
+  mapW = w; mapH = Math.round(mapW / ASPECT);
   mapC.style.height = mapH + "px";
   mapC.width = Math.round(mapW * dpr); mapC.height = Math.round(mapH * dpr);
   mapX.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return true;
 }
 function drawMap() {
   mapX.clearRect(0, 0, mapW, mapH);
@@ -985,13 +1028,18 @@ function nmPx(x, y) {
   return [(x - NB.x0) / (NB.x1 - NB.x0) * (nmW - 34) + 17,
           (1 - (y - NB.y0) / (NB.y1 - NB.y0)) * (nmH - 34) + 17];
 }
+var lastNmW = -1, lastNmDpr = -1;
 function sizeNm() {
   var r = nmC.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-  nmW = Math.max(260, r.width); nmH = Math.round(mapH || nmW * 0.82);
+  var w = Math.max(260, Math.round(r.width));
+  if (w === lastNmW && dpr === lastNmDpr) return false;
+  lastNmW = w; lastNmDpr = dpr;
+  nmW = w; nmH = Math.round(mapH || nmW * 0.82);
   nmC.style.height = nmH + "px";
   nmC.width = Math.round(nmW * dpr); nmC.height = Math.round(nmH * dpr);
   nmX.setTransform(dpr, 0, 0, dpr, 0, 0);
   NB = nmBounds();
+  return true;
 }
 function drawNm() {
   nmX.clearRect(0, 0, nmW, nmH);
@@ -1056,6 +1104,7 @@ var shBuf = document.createElement("canvas");
 var tkW = 0, tkH = 0, W = 0, H = 0, PX = 3, SKY = 0, PORTRAIT = false;
 var fish = [], decor = [], flecks = [], kelp = [], clouds = [];
 var running = false, last = 0, tclock = 0, spotlight = null;
+var lastTkW = -1, lastTkDpr = -1;
 var PEAK_MAX = 1700;
 
 /* sky: cool at altitude, warm at the horizon */
@@ -1099,9 +1148,16 @@ var ART = {
   tube:     ["c.c.c","c.c.c","c.c.c",".ccc.","..c.."]
 };
 
+/* Geometry only. iOS fires a resize event on every scroll as the URL bar
+   collapses and expands; rebuilding the scene there is what made the aquarium
+   jump. Only the width (or pixel ratio) can change the layout, so everything
+   else returns early and the scene is left alone. */
 function sizeTank() {
   var r = tkC.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
-  tkW = Math.max(300, r.width);
+  var w = Math.max(300, Math.round(r.width));
+  if (w === lastTkW && dpr === lastTkDpr) return false;
+  lastTkW = w; lastTkDpr = dpr;
+  tkW = w;
   /* portrait is a different scene, not a squeezed one: the water column
      becomes the subject and the island shrinks to a strip along the top */
   PORTRAIT = tkW < 560;
@@ -1117,9 +1173,17 @@ function sizeTank() {
   buf.width = W; buf.height = H; bx.imageSmoothingEnabled = false;
   bgBuf.width = W; bgBuf.height = H; gx.imageSmoothingEnabled = false;
   SKY = Math.round(H * (PORTRAIT ? 0.15 : 0.24));
-
-  makeScenery(); buildShaft();
-  if (sel) { buildBg(siteBy[sel]); layoutFish(); layoutDecor(); }
+  return true;
+}
+/* Everything random lives here, and it is only ever called when the site
+   changes or the tank genuinely resized — never on a scroll. */
+function restock() {
+  if (!sel) return;
+  makeScenery();
+  buildShaft();
+  buildBg(siteBy[sel]);
+  layoutFish();
+  layoutDecor();
 }
 function makeScenery() {
   kelp = []; clouds = []; flecks = [];
@@ -1379,7 +1443,7 @@ function blit(meta, x, y, s, vx, ghost) {
   if (ghost) tkX.globalAlpha = ghost;
   tkX.translate(sx, sy);
   if (vx > 0) tkX.scale(-1, 1);
-  tkX.drawImage(meta.cv, -Math.round(w / 2), -Math.round(h / 2), w, h);
+  tkX.drawImage(ATLAS, meta.x, meta.y, meta.w, meta.h, -Math.round(w / 2), -Math.round(h / 2), w, h);
   tkX.restore();
 }
 
@@ -1504,21 +1568,15 @@ function renderGrid() {
     card.className = "card" + (spotlight === sp.name ? " on" : "");
     /* every thumbnail lives in the same box and the zoom is fitted to both
        axes, so a 44x5 needlefish can no longer squeeze the name out */
-    var z = meta ? Math.max(1, Math.floor(Math.min(TH_W / meta.w, TH_H / meta.h))) : 1;
+    var src = meta ? thumbURL(sp.name) : "";
     card.innerHTML =
       '<button class="spot" type="button" aria-pressed="' + (spotlight === sp.name) + '">' +
-        (meta ? '<canvas width="' + TH_W * 2 + '" height="' + TH_H * 2 + '"></canvas>' : "") +
+        (src ? '<img class="th" alt="" src="' + src + '">' : "") +
         '<span><span class="nm">' + sp.name + "</span>" + fmtTag(sp.name) +
         '<span class="cn">' + (tr.common && tr.common !== sp.name ? tr.common + " \u00b7 " : "") +
           (100 * sp.proportion).toFixed(1) + "%</span>" +
         '<span class="bar"><i style="width:' + (100 * sp.proportion / max).toFixed(1) + '%"></i></span></span>' +
       "</button>";
-    if (meta) {
-      var cv = card.querySelector("canvas"), cx = cv.getContext("2d");
-      cx.imageSmoothingEnabled = false;
-      var dw = meta.w * z * 2, dh = meta.h * z * 2;
-      cx.drawImage(meta.cv, Math.round((TH_W * 2 - dw) / 2), Math.round((TH_H * 2 - dh) / 2), dw, dh);
-    }
     card.querySelector(".spot").onclick = function () {
       spotlight = spotlight === sp.name ? null : sp.name;
       renderGrid(); drawTank();
@@ -1542,7 +1600,7 @@ function select(code) {
   $("sh-meta").textContent = s.island + " · " + (T.reg[s.region] || s.region) + " · " + s.date;
   $("lk-gbif").href = "https://www.gbif.org/occurrence/search?q=" +
     encodeURIComponent((d.species[0] || {}).name || "Galapagos");
-  sizeTank(); renderNote(); renderGrid();
+  sizeTank(); restock(); renderNote(); renderGrid();
   drawMap(); drawNm();
   step(0);
   if (REDUCED) drawTank();
@@ -1558,13 +1616,18 @@ function showTip(ev, html) {
 }
 function hideTip() { tip.classList.remove("on"); }
 
+/* On a touch screen a tap emits a synthetic mousemove before the click, so
+   hover tooltips appear and then stick with no mouseleave to clear them.
+   Pointer-capable devices get tooltips; touch devices just tap to select. */
+var CAN_HOVER = !window.matchMedia || matchMedia("(hover: hover)").matches;
 function wire(canvas, hit, label) {
-  canvas.addEventListener("mousemove", function (ev) {
+  if (CAN_HOVER) canvas.addEventListener("mousemove", function (ev) {
     var r = canvas.getBoundingClientRect(), h = hit(ev.clientX - r.left, ev.clientY - r.top);
     if (h) { showTip(ev, label(h)); canvas.style.cursor = "pointer"; }
     else { hideTip(); canvas.style.cursor = "crosshair"; }
   });
-  canvas.addEventListener("mouseleave", hideTip);
+  if (CAN_HOVER) canvas.addEventListener("mouseleave", hideTip);
+  canvas.addEventListener("touchstart", hideTip, { passive: true });
   canvas.addEventListener("click", function (ev) {
     var r = canvas.getBoundingClientRect(), h = hit(ev.clientX - r.left, ev.clientY - r.top);
     if (h) { select(h.code || h.s); hideTip(); }
@@ -1610,11 +1673,38 @@ $("lang-en").onclick = function () { lang = "en"; applyLang(); };
 $("lang-es").onclick = function () { lang = "es"; applyLang(); };
 
 /* ──────────────────────────────── boot ───────────────────────────────── */
-function resizeAll() { sizeMap(); sizeNm(); drawMap(); drawNm(); if (sel) { sizeTank(); if (REDUCED) drawTank(); } }
-addEventListener("resize", resizeAll);
+/* A real layout change rebuilds; anything else only repaints. Keeping these
+   two apart is what stops a scroll from regenerating the scene. */
+function relayout() {
+  var changed = sizeMap();
+  if (sizeNm()) changed = true;
+  if (changed) { drawMap(); drawNm(); }
+  if (sel && sizeTank()) { restock(); step(0); drawTank(); }
+}
+function repaint() { drawMap(); drawNm(); if (sel) drawTank(); }
+
+var rzT = 0;
+function onResize() { clearTimeout(rzT); rzT = setTimeout(relayout, 180); }
+addEventListener("resize", onResize);
+addEventListener("orientationchange", function () { clearTimeout(rzT); rzT = setTimeout(relayout, 260); });
+addEventListener("pageshow", repaint);
+document.addEventListener("visibilitychange", function () { if (!document.hidden) repaint(); });
+
 bathy.onload = function () { drawMap(); };
+buildAtlas();
 applyLang();
-resizeAll();
+sizeMap(); sizeNm(); drawMap(); drawNm();
+
+/* don't animate a tank nobody is looking at: saves battery and keeps
+   scrolling smooth on a phone */
+if (window.IntersectionObserver) {
+  new IntersectionObserver(function (es) {
+    var vis = es[0].isIntersecting;
+    if (vis) {
+      if (sel && !REDUCED && !running) { running = true; last = performance.now(); requestAnimationFrame(frame); }
+    } else running = false;
+  }, { threshold: 0 }).observe(tkC);
+}
 })();
 </script>
 </body>
