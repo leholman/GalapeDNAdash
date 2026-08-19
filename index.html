@@ -10,6 +10,13 @@
   --abyss:#071f30; --deep:#0d374d; --shelf:#1d6c90; --shoal:#9fc6d8;
   --chart:#e4ecf0; --panel:#fbfcfd; --line:#bfd0d9; --rule:#8fa9b6;
   --ink:#122530; --body:#37505d; --mute:#65808e;
+  /* Text measures are derived from the layout, not chosen per element.
+     --col-left is exactly the width of the map plate below (the 1.28fr track of
+     the 1.28fr + 1fr panel grid), so the masthead sits flush over it.
+     --measure is one shared column width for every other block of prose. */
+  --gap:20px;
+  --col-left:calc((100% - var(--gap)) * 0.5614);
+  --measure:660px;
   --display:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --mono:ui-monospace,SFMono-Regular,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
   --flag-thr:#d9772a; --flag-end:#b23a2c; --flag-intro:#b3439a;
@@ -33,12 +40,9 @@ body{
 .eyebrow b{color:var(--shelf);font-weight:600}
 h1{
   font-family:var(--display); font-weight:400; color:var(--ink);
-  font-size:clamp(28px,4.4vw,46px); line-height:1.1; letter-spacing:-.014em; margin:0 0 6px; max-width:22em
+  font-size:clamp(30px,5vw,56px); line-height:1.08; letter-spacing:-.016em; margin:0 0 6px
 }
-.gloss{font-style:italic;color:var(--mute);font-size:clamp(15px,1.6vw,18px);margin:0 0 22px;max-width:34em}
-.byline{font-family:var(--mono);font-size:12.5px;color:var(--body);line-height:1.75;margin:0 0 4px;max-width:52em}
-.byline em{font-style:normal;color:var(--mute)}
-.lede{font-size:17.5px;max-width:38em;margin:22px 0 0;color:var(--body)}
+.lede{font-size:17.5px;margin:0;color:var(--body)}
 
 .langbar{position:absolute;top:0;right:0;display:flex;gap:0;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
 .mastrel{position:relative}
@@ -54,7 +58,7 @@ h1{
 .sechead{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 18px;margin:0 0 22px}
 .seclab{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--shelf)}
 .sectitle{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.4vw,27px);color:var(--ink);margin:0;letter-spacing:-.01em}
-.secsub{font-size:15px;color:var(--mute);max-width:44em;margin:0;flex:1 1 260px}
+.secsub{font-size:15px;color:var(--mute);margin:0}
 
 /* ---------- panels ---------- */
 .panels{display:grid;grid-template-columns:1.28fr 1fr;gap:20px;align-items:start}
@@ -65,6 +69,7 @@ h1{
 
 .legend{display:flex;flex-wrap:wrap;gap:4px 15px;font-family:var(--mono);font-size:10.5px;color:var(--mute);margin:10px 2px 0;text-transform:uppercase;letter-spacing:.07em}
 .legend span{display:flex;align-items:center;gap:6px}
+.legend .leglab{font-weight:700;color:var(--ink);letter-spacing:.15em;margin-right:2px}
 .legend i{width:9px;height:9px;border-radius:50%;display:block;border:1px solid rgba(0,0,0,.25)}
 
 .tip{
@@ -86,8 +91,6 @@ h1{
 .empty{padding:62px 20px 68px;text-align:center;color:#7ba7bc;font-family:var(--mono);font-size:12px;letter-spacing:.07em;line-height:1.9}
 .empty b{display:block;font-family:var(--display);font-size:21px;letter-spacing:0;color:#e8f3f7;text-transform:none;margin-bottom:9px;font-weight:400}
 
-.tanknote{max-width:78ch;padding:13px 18px 16px;margin:0;font-family:var(--mono);font-size:10px;line-height:1.8;color:#5f8ba1;border-top:1px solid rgba(159,198,216,.14)}
-.tanknote b{color:#8fb8cc;font-weight:400}
 
 /* ---------- species grid ---------- */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(212px,1fr));gap:9px;margin:20px 0 4px}
@@ -111,12 +114,47 @@ h1{
 .lk:hover{border-color:var(--shelf)}
 .lk b{display:block;font-family:var(--display);font-size:17px;font-weight:400;margin-bottom:3px}
 .lk span{font-family:var(--mono);font-size:11px;color:var(--mute);line-height:1.6;display:block}
-.foot{border-top:1px solid var(--rule);margin-top:34px;padding:22px 0 60px;font-family:var(--mono);font-size:11px;color:var(--mute);line-height:1.85}
+.paper{border-top:1px solid var(--line);margin:26px 0 0;padding:22px 0 4px}
+.paper p{margin:0 0 7px;max-width:var(--measure)}
+.paper .ptitle{font-family:var(--display);font-size:18px;line-height:1.35;color:var(--ink);letter-spacing:-.008em}
+.paper .pauth{font-family:var(--mono);font-size:12px;color:var(--body);line-height:1.7}
+.paper .paff{font-family:var(--mono);font-size:11px;color:var(--mute);line-height:1.7}
+.paper .pcite,.paper .pdata{font-family:var(--mono);font-size:11px;color:var(--mute);line-height:1.8}
+.paper a{color:var(--shelf)}
+.foot{border-top:1px solid var(--rule);margin-top:26px;padding:20px 0 60px}
+.foot p{margin:0;column-width:330px;column-gap:38px;font-family:var(--mono);font-size:10.5px;color:var(--mute);line-height:1.85}
 .foot a{color:var(--shelf)}
+
+/* ---------- wide layout ----------
+   Above the panel breakpoint the masthead, every section header and the
+   citation block all adopt the same two-track grid as the panels below:
+   heading over the map, supporting text over the ordination. That is what
+   fills the right-hand half — previously the prose stopped at the left
+   track's edge and the rest of the row was dead space. */
+@media (min-width:861px){
+  .mast{display:grid;grid-template-columns:var(--col-left) 1fr;column-gap:var(--gap);align-items:start}
+  .mast .eyebrow{grid-column:1 / -1}
+  .mast h1{grid-column:1;grid-row:2}
+  .mast .lede{grid-column:2;grid-row:2;margin-top:14px}
+
+  .sechead{display:grid;grid-template-columns:var(--col-left) 1fr;column-gap:var(--gap);row-gap:0;align-items:end}
+  .sechead .seclab{grid-column:1;margin-bottom:7px}
+  .sechead .sectitle{grid-column:1}
+  .sechead .secsub{grid-column:2;grid-row:1 / span 2;align-self:end}
+
+  .paper{display:grid;grid-template-columns:var(--col-left) 1fr;column-gap:var(--gap)}
+  .paper .ptitle{grid-column:1;grid-row:1}
+  .paper .pauth{grid-column:1;grid-row:2}
+  .paper .paff{grid-column:1;grid-row:3}
+  .paper .pcite{grid-column:2;grid-row:1}
+  .paper .pdata{grid-column:2;grid-row:2}
+}
 
 @media (max-width:860px){
   body{font-size:16px}
   .panels{grid-template-columns:1fr}
+  /* one column: there is no left track to align to, so prose fills the width */
+  :root{--col-left:100%;--measure:100%}
   .mast{padding:44px 0 20px}
   .langbar{position:static;margin:0 0 18px;width:max-content}
   .plate canvas{cursor:pointer}
@@ -135,15 +173,9 @@ h1{
     <p class="eyebrow">
       <span data-i18n="ey1">Companion dashboard</span>
       <span>·</span><b data-i18n="ey2">Diversity and Distributions</b>
-      <span>·</span><span data-i18n="ey3">accepted, DOI to follow</span>
+      <span>·</span><span data-i18n="ey3">2026</span>
     </p>
-    <h1>Fine-scale oceanographic processes shape marine biodiversity patterns inferred from environmental DNA in the Galápagos Islands</h1>
-    <p class="gloss" id="gloss"></p>
-    <p class="byline">
-      Luke E. Holman, Diana A. Pazmiño, Shyam Gopalakrishnan, Alexander Forryan,
-      Alex R. Hearn, Alberto C. Naveira-Garabato, Marc Rius<br>
-      <em data-i18n="affil">University of Copenhagen · University of Southampton · Galápagos Science Center, USFQ · MigraMar · CEAB-CSIC · University of Johannesburg</em>
-    </p>
+    <h1 data-i18n="h1">Marine eDNA from the Galápagos Islands</h1>
     <p class="lede" data-i18n="lede"></p>
   </header>
 
@@ -160,16 +192,15 @@ h1{
         <canvas id="map" tabindex="0" role="img" aria-label="Map of the Galápagos with 23 sampling sites"></canvas>
         <div class="legend" id="maplegend"></div>
         <figcaption>
-          <span data-i18n="capmap">Fig. 1a · GEBCO 2022 bathymetry</span>
-          <span data-i18n="capmap2">50 km</span>
+          <span data-i18n="capmap">50 km scale bar</span>
+          <span data-i18n="capmap2">GEBCO 2022 bathymetry</span>
         </figcaption>
       </figure>
 
       <figure class="plate" style="margin:0">
         <canvas id="nmds" tabindex="0" role="img" aria-label="Non-metric multidimensional scaling of fish community composition"></canvas>
         <figcaption>
-          <span data-i18n="capnm">Fig. 1c · Jaccard dissimilarity</span>
-          <span>stress = 0.23</span>
+          <span data-i18n="capnm">Jaccard dissimilarity of fish communities</span>
         </figcaption>
       </figure>
     </div>
@@ -178,7 +209,6 @@ h1{
   <!-- ============ panel 2: the aquarium ============ -->
   <section class="sec" aria-labelledby="p2t">
     <div class="sechead">
-      <span class="seclab" data-i18n="s2lab">Reconstruction</span>
       <h2 class="sectitle" id="p2t" data-i18n="s2t">What was in the water</h2>
       <p class="secsub" data-i18n="s2s"></p>
     </div>
@@ -194,7 +224,6 @@ h1{
         <span data-i18n="emptys">Tap a dot on the map, or a point in the ordination.</span>
       </div>
       <canvas id="tank" hidden></canvas>
-      <p class="tanknote" id="tanknote" hidden></p>
     </div>
   </section>
 
@@ -215,16 +244,29 @@ h1{
       <h2 class="sectitle" id="p4t" data-i18n="s4t">Paper, records and reference</h2>
     </div>
     <div class="links">
-      <a class="lk" id="lk-paper" href="https://onlinelibrary.wiley.com/journal/14724642" target="_blank" rel="noopener">
+      <a class="lk" href="https://doi.org/10.1111/ddi.70239" target="_blank" rel="noopener">
         <b data-i18n="lk1t">Read the paper</b><span data-i18n="lk1s"></span></a>
-      <a class="lk" id="lk-gbif" href="https://www.gbif.org/" target="_blank" rel="noopener">
-        <b data-i18n="lk2t">Look these taxa up on GBIF</b><span data-i18n="lk2s"></span></a>
-      <a class="lk" href="https://www.galapafish.com/" target="_blank" rel="noopener">
-        <b data-i18n="lk3t">GalapaFish</b><span data-i18n="lk3s"></span></a>
-      <a class="lk" href="https://doi.org/10.5281/zenodo.10593433" target="_blank" rel="noopener">
-        <b data-i18n="lk4t">Data and code</b><span data-i18n="lk4s"></span></a>
+      <a class="lk" href="https://www.gbif.org/dataset/b132d337-af53-46e9-b907-17378119a32d/project" target="_blank" rel="noopener">
+        <b data-i18n="lk2t">Occurrence records on GBIF</b><span data-i18n="lk2s"></span></a>
     </div>
-    <p class="foot" id="foot"></p>
+
+    <div class="paper">
+      <p class="ptitle">Fine-Scale Oceanographic Processes Shape Marine Biodiversity Patterns
+        Inferred From Environmental DNA in the Galápagos Islands</p>
+      <p class="pauth">Luke E. Holman, Diana A. Pazmiño, Shyam Gopalakrishnan, Alexander Forryan,
+        Alex R. Hearn, Alberto C. Naveira-Garabato, Marc Rius</p>
+      <p class="paff" data-i18n="affil">University of Copenhagen · University of Southampton ·
+        Galápagos Science Center USFQ · MigraMar · Universidad San Francisco de Quito ·
+        CEAB-CSIC · University of Johannesburg</p>
+      <p class="pcite"><i>Diversity and Distributions</i> (2026) 32: e70239 ·
+        <a href="https://doi.org/10.1111/ddi.70239" target="_blank" rel="noopener">doi.org/10.1111/ddi.70239</a>
+        · <span data-i18n="oa">Open access</span></p>
+      <p class="pdata"><span data-i18n="datalab">Sequence data</span>:
+        <a href="https://www.ebi.ac.uk/ena/browser/view/PRJEB55415" target="_blank" rel="noopener">ENA PRJEB55415</a>
+        · <span data-i18n="codelab">Data and code</span>:
+        <a href="https://doi.org/10.5281/zenodo.10593433" target="_blank" rel="noopener">Zenodo 10.5281/zenodo.10593433</a></p>
+    </div>
+    <div class="foot"><p id="foot"></p></div>
   </section>
 </div>
 <div class="tip" id="tip" role="status" aria-live="polite"></div>
@@ -818,59 +860,51 @@ var dataBy = {}; DATA.sites.forEach(function (s) { dataBy[s.code] = s; });
 /* ───────────────────────── copy, both languages ───────────────────────── */
 var STR = {
 en:{
- ey1:"Companion dashboard", ey2:"Diversity and Distributions", ey3:"accepted, DOI to follow",
- gloss:"How the currents running between islands shape which fish live where — read from the DNA in a bottle of seawater.",
- affil:"University of Copenhagen · University of Southampton · Galápagos Science Center, USFQ · MigraMar · CEAB-CSIC · University of Johannesburg",
- lede:"We filtered seawater at 23 coastal sites across the archipelago and sequenced the fish DNA it carried. The communities split cleanly along the known bioregions — and the split is explained not only by distance and temperature, but by the direction and strength of the currents running between sites. Pick a site below to see where it sits, how its community compares, and what the water said was living there.",
+ ey1:"Companion dashboard", ey2:"Diversity and Distributions", ey3:"2026",
+ h1:"Marine eDNA from the Galápagos Islands",
+ affil:"University of Copenhagen · University of Southampton · Galápagos Science Center USFQ · MigraMar · Universidad San Francisco de Quito · CEAB-CSIC · University of Johannesburg",
+ lede:"Animals leave DNA traces in the water as they move through the ocean, we call this environmental DNA or eDNA. We filtered seawater at 23 coastal sites across the archipelago and sequenced fish eDNA from the samples. The fish communities split cleanly along the known bioregions, and revealed an important role for geography, currents and temperature in shaping fish communities. Pick a site below to see where it sits, how its community compares, and what the water said was living there.",
  s1lab:"23 sites · 69 samples · September–October 2018", s1t:"One litre of seawater per stop",
  s1s:"Each dot is a site, coloured by bioregion. On the right, every point is one field replicate; the three replicates from a site are joined by a grey hull. Click either panel — the other follows.",
- capmap:"Fig. 1a · GEBCO 2022 bathymetry", capmap2:"50 km scale bar",
- capnm:"Fig. 1c · Jaccard dissimilarity of fish communities",
- s2lab:"Reconstruction", s2t:"What was in the water",
+ capmap:"50 km scale bar", capmap2:"GEBCO 2022 bathymetry",
+ capnm:"Jaccard dissimilarity of fish communities",
+ biolab:"Bioregions",
+ s2t:"What was in the water",
  s2s:"Fish are stocked in proportion to their mean relative abundance across the three replicates, and sized by the real length of the species. The skyline above the waterline is the actual horizon from that sampling point, cut from the same bathymetric grid as the map.",
  s3lab:"Detections", s3t:"Every fish taxon in this sample",
  s3s:"Ordered by signal strength. Tap a card to spotlight that taxon in the tank.",
- s4lab:"Go deeper", s4t:"Paper, records and reference",
- lk1t:"Read the paper", lk1s:"Diversity and Distributions · accepted, link updates when the DOI is issued",
- lk2t:"Look this site up on GBIF", lk2s:"Occurrence records for the taxa detected here",
- lk3t:"GalapaFish", lk3s:"Reference guide to the fishes of the Galápagos",
- lk4t:"Data and code", lk4s:"Zenodo 10.5281/zenodo.10593433 · reads at ENA PRJEB55415",
+ s4lab:"Go deeper", s4t:"The paper and the records",
+ lk1t:"Read the paper", lk1s:"Diversity and Distributions (2026) 32: e70239 · open access",
+ lk2t:"Occurrence records on GBIF", lk2s:"Every occurrence published from this study, as one dataset",
+ oa:"Open access", datalab:"Sequence data", codelab:"Data and code",
  emptyt:"Pick a site", emptys:"Tap a dot on the map, or a point in the ordination.",
  reg:{Western:"Western", Elizabeth:"Elizabeth", Northern:"Northern", CSouthEastern:"Central south-eastern"},
- st:{rich:"ASV richness", taxa:"Fish taxa", shan:"Shannon H′", even:"Evenness J′", peak:"Skyline peak", reg:"Bioregion"},
- also:"Also detected in this water, from the same fish primers:",
- nonfish:"Non-fish detections are bycatch of the 12S fish primers, so they are presence records rather than counts — they are drawn as background, never scaled.",
- coarse:"This islet is smaller than one bathymetric grid cell, so its profile is scaled to the published summit height rather than measured.",
  gen:"genus", thr:"threatened", ende:"endemic", intro:"introduced",
- foot:"Fish are pixel reconstructions, not photographs: body shape comes from family, size from published adult length, and shoal size from read proportion. Read counts are a relative signal, not a census. IUCN flags are indicative and cannot be assigned to genus-level matches. Above-water profiles are cut from GEBCO 2022 at 15 arc-second resolution.",
+ foot:"Fish are pixel reconstructions, not photographs: body shape comes from family, size from published adult length, and shoal size from read proportion. Read counts are a relative signal, not a census. Non-fish animals are bycatch of the 12S fish primers, so they appear as presence records and are never scaled. IUCN flags are indicative and cannot be assigned to genus-level matches. Above-water profiles are cut from GEBCO 2022 at 15 arc-second resolution.",
  maparia:"Map of the Galápagos with 23 sampling sites"
 },
 es:{
- ey1:"Panel complementario", ey2:"Diversity and Distributions", ey3:"aceptado, DOI pendiente",
- gloss:"Procesos oceanográficos de escala fina determinan los patrones de biodiversidad marina inferidos del ADN ambiental en las islas Galápagos.",
- affil:"Universidad de Copenhague · Universidad de Southampton · Galápagos Science Center, USFQ · MigraMar · CEAB-CSIC · Universidad de Johannesburgo",
- lede:"Filtramos agua de mar en 23 sitios costeros del archipiélago y secuenciamos el ADN de peces que contenía. Las comunidades se separan con claridad según las bioregiones ya descritas, y esa separación se explica no solo por la distancia y la temperatura, sino por la dirección y la fuerza de las corrientes que circulan entre los sitios. Elija un sitio para ver dónde está, cómo se compara su comunidad y qué dijo el agua que vivía allí.",
+ ey1:"Panel complementario", ey2:"Diversity and Distributions", ey3:"2026",
+ h1:"ADN ambiental marino de las islas Galápagos",
+ affil:"Universidad de Copenhague · Universidad de Southampton · Galápagos Science Center USFQ · MigraMar · Universidad San Francisco de Quito · CEAB-CSIC · Universidad de Johannesburgo",
+ lede:"Los animales dejan rastros de ADN en el agua a medida que se mueven por el océano; lo llamamos ADN ambiental o eDNA. Filtramos agua de mar en 23 sitios costeros del archipiélago y secuenciamos el eDNA de peces de las muestras. Las comunidades de peces se separan con claridad según las bioregiones ya conocidas, y revelan un papel importante de la geografía, las corrientes y la temperatura en la conformación de las comunidades de peces. Elija un sitio para ver dónde está, cómo se compara su comunidad y qué dijo el agua que vivía allí.",
  s1lab:"23 sitios · 69 muestras · septiembre–octubre 2018", s1t:"Un litro de agua de mar por parada",
  s1s:"Cada punto es un sitio, con color según su bioregión. A la derecha, cada punto es una réplica de campo; las tres réplicas de un sitio se unen con un polígono gris. Haga clic en cualquiera de los dos paneles: el otro le sigue.",
- capmap:"Fig. 1a · batimetría GEBCO 2022", capmap2:"escala de 50 km",
- capnm:"Fig. 1c · disimilitud de Jaccard entre comunidades de peces",
- s2lab:"Reconstrucción", s2t:"Lo que había en el agua",
+ capmap:"escala de 50 km", capmap2:"batimetría GEBCO 2022",
+ capnm:"disimilitud de Jaccard entre comunidades de peces",
+ biolab:"Bioregiones",
+ s2t:"Lo que había en el agua",
  s2s:"Los peces aparecen en proporción a su abundancia relativa media entre las tres réplicas, y su tamaño corresponde a la longitud real de la especie. El perfil sobre la línea de agua es el horizonte real desde ese punto de muestreo, recortado de la misma malla batimétrica del mapa.",
  s3lab:"Detecciones", s3t:"Todos los taxones de peces de esta muestra",
  s3s:"Ordenados por intensidad de señal. Toque una tarjeta para destacar ese taxón en el tanque.",
- s4lab:"Más a fondo", s4t:"Artículo, registros y referencia",
- lk1t:"Leer el artículo", lk1s:"Diversity and Distributions · aceptado, el enlace se actualizará con el DOI",
- lk2t:"Buscar estos taxones en GBIF", lk2s:"Registros de presencia — cada tarjeta enlaza a su propia página de GBIF",
- lk3t:"GalapaFish", lk3s:"Guía de referencia de los peces de Galápagos",
- lk4t:"Datos y código", lk4s:"Zenodo 10.5281/zenodo.10593433 · lecturas en ENA PRJEB55415",
+ s4lab:"Más a fondo", s4t:"El artículo y los registros",
+ lk1t:"Leer el artículo", lk1s:"Diversity and Distributions (2026) 32: e70239 · acceso abierto",
+ lk2t:"Registros de presencia en GBIF", lk2s:"Todos los registros publicados de este estudio, como un solo conjunto de datos",
+ oa:"Acceso abierto", datalab:"Datos de secuencias", codelab:"Datos y código",
  emptyt:"Elija un sitio", emptys:"Toque un punto del mapa o de la ordenación.",
  reg:{Western:"Occidental", Elizabeth:"Elizabeth", Northern:"Norte", CSouthEastern:"Centro-suroriental"},
- st:{rich:"Riqueza de ASV", taxa:"Taxones de peces", shan:"Shannon H′", even:"Equidad J′", peak:"Altura del perfil", reg:"Bioregión"},
- also:"También detectado en esta agua, con los mismos cebadores de peces:",
- nonfish:"Las detecciones que no son peces provienen como subproducto de los cebadores 12S, así que son registros de presencia y no recuentos: se dibujan como fondo y nunca se escalan.",
- coarse:"Este islote es más pequeño que una celda de la malla batimétrica, así que su perfil se escala a la altura publicada de la cumbre en lugar de medirse.",
  gen:"género", thr:"amenazado", ende:"endémico", intro:"introducido",
- foot:"Los peces son reconstrucciones en píxeles, no fotografías: la forma del cuerpo proviene de la familia, el tamaño de la longitud adulta publicada y el tamaño del cardumen de la proporción de lecturas. Las lecturas son una señal relativa, no un censo. Las categorías de la UICN son indicativas y no pueden asignarse a coincidencias a nivel de género. Los perfiles sobre el agua se recortan de GEBCO 2022 con resolución de 15 segundos de arco.",
+ foot:"Los peces son reconstrucciones en píxeles, no fotografías: la forma del cuerpo proviene de la familia, el tamaño de la longitud adulta publicada y el tamaño del cardumen de la proporción de lecturas. Las lecturas son una señal relativa, no un censo. Los animales que no son peces provienen como subproducto de los cebadores 12S, así que aparecen como registros de presencia y nunca se escalan. Las categorías de la UICN son indicativas y no pueden asignarse a coincidencias a nivel de género. Los perfiles sobre el agua se recortan de GEBCO 2022 con resolución de 15 segundos de arco.",
  maparia:"Mapa de Galápagos con los 23 sitios de muestreo"
 }};
 var lang = "en", T = STR.en;
@@ -1028,13 +1062,22 @@ function nmPx(x, y) {
   return [(x - NB.x0) / (NB.x1 - NB.x0) * (nmW - 34) + 17,
           (1 - (y - NB.y0) / (NB.y1 - NB.y0)) * (nmH - 34) + 17];
 }
-var lastNmW = -1, lastNmDpr = -1;
+var lastNmKey = "", lastNmDpr = -1;
 function sizeNm() {
   var r = nmC.getBoundingClientRect(), dpr = Math.min(devicePixelRatio || 1, 2);
   var w = Math.max(260, Math.round(r.width));
-  if (w === lastNmW && dpr === lastNmDpr) return false;
-  lastNmW = w; lastNmDpr = dpr;
-  nmW = w; nmH = Math.round(mapH || nmW * 0.82);
+  /* The map plate carries a bioregion legend under its canvas, so matching the
+     two canvases still left the two plates uneven. Side by side, the ordination
+     canvas takes the legend's height back so both plates finish level. */
+  var extra = 0;
+  if (!window.matchMedia || matchMedia("(min-width:861px)").matches) {
+    var leg = $("maplegend");
+    if (leg && leg.offsetHeight) extra = leg.offsetHeight + 10;
+  }
+  var key = w + ":" + dpr + ":" + mapH + ":" + extra;
+  if (key === lastNmKey) return false;
+  lastNmKey = key; lastNmDpr = dpr;
+  nmW = w; nmH = Math.round((mapH || nmW * 0.82) + extra);
   nmC.style.height = nmH + "px";
   nmC.width = Math.round(nmW * dpr); nmC.height = Math.round(nmH * dpr);
   nmX.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1168,7 +1211,7 @@ function sizeTank() {
      becomes the subject and the island shrinks to a strip along the top */
   PORTRAIT = tkW < 560;
   tkH = PORTRAIT ? Math.round(clamp(tkW * 1.42, 380, 640))
-                 : Math.round(clamp(tkW * 0.42, 250, 460));
+                 : Math.round(clamp(tkW * 0.84, 500, 920));
   tkC.style.height = tkH + "px";
   tkC.width = Math.round(tkW * dpr); tkC.height = Math.round(tkH * dpr);
   tkX.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -1178,7 +1221,9 @@ function sizeTank() {
   W = Math.ceil(tkW / PX); H = Math.ceil(tkH / PX);
   buf.width = W; buf.height = H; bx.imageSmoothingEnabled = false;
   bgBuf.width = W; bgBuf.height = H; gx.imageSmoothingEnabled = false;
-  SKY = Math.round(H * (PORTRAIT ? 0.15 : 0.24));
+  /* All the new height goes to the water column: holding the sky at 15%
+     keeps the island the same strip it was rather than doubling it too. */
+  SKY = Math.round(H * 0.15);
   return true;
 }
 /* Everything random lives here, and it is only ever called when the site
@@ -1194,11 +1239,13 @@ function restock() {
 function makeScenery() {
   kelp = []; clouds = []; flecks = [];
   var i;
+  var wt0 = Math.max(8, H - SKY);
   for (i = 0; i < Math.round(W / 30); i++)
-    kelp.push({ x: ri(3, W - 3), h: ri(10, 28), ph: rnd(0, 6.28), sw: rnd(.4, .9) });
+    kelp.push({ x: ri(3, W - 3), h: ri(Math.round(wt0 * .10), Math.round(wt0 * .28)),
+                ph: rnd(0, 6.28), sw: rnd(.4, .9) });
   for (i = 0; i < 4; i++)
     clouds.push({ x: rnd(0, W), y: ri(2, Math.max(3, Math.round(SKY * .5))), w: ri(14, 34), v: rnd(.4, 1.1) });
-  for (i = 0; i < Math.round(W * (PORTRAIT ? .95 : .55)); i++)
+  for (i = 0; i < Math.round(W * H / (PORTRAIT ? 120 : 210)); i++)
     flecks.push({ x: rnd(0, W), y: rnd(SKY, H), v: rnd(1, 3.6), a: Math.random() });
 }
 function buildShaft() {
@@ -1376,7 +1423,7 @@ function layoutFish() {
   var site = dataBy[sel];
   /* stock to the area available, so a phone gets a readable crowd and a
      desktop gets a full one, both at the same visual density */
-  var TARGET = clamp(Math.round(tkW * tkH / 5800), 30, 95);
+  var TARGET = clamp(Math.round(tkW * tkH / 5800), 30, 190);
   fish = [];
   var zones = {};
   site.species.forEach(function (sp) {
@@ -1555,15 +1602,6 @@ function fmtTag(name) {
   else if (tr.iucn === "VU" || tr.iucn === "NT") out += '<span class="tag thr">' + tr.iucn + "</span>";
   return out;
 }
-function renderNote() {
-  var list = decorFor(sel).map(function (m) {
-    return m.common + (m.introduced ? " (" + T.intro + ")" : "");
-  });
-  var html = list.length ? "<b>" + T.also + "</b> " + list.join(" · ") + "<br>" : "";
-  html += T.nonfish;
-  if (siteBy[sel].coarse) html += " " + T.coarse;
-  $("tanknote").innerHTML = html;
-}
 function renderGrid() {
   var d = dataBy[sel], g = $("grid");
   g.innerHTML = "";
@@ -1597,16 +1635,14 @@ function select(code) {
   sel = code; spotlight = null;
   var s = siteBy[code], d = dataBy[code];
   $("empty").hidden = true;
-  ["tank", "tanknote", "stagehead"].forEach(function (id) { $(id).hidden = false; });
+  ["tank", "stagehead"].forEach(function (id) { $(id).hidden = false; });
   $("sec-sp").hidden = false;
   $("sh-code").textContent = code;
   $("sh-code").style.background = s.col;
   $("sh-code").style.color = readable(s.col);
   $("sh-name").textContent = s.name;
   $("sh-meta").textContent = s.island + " · " + (T.reg[s.region] || s.region) + " · " + s.date;
-  $("lk-gbif").href = "https://www.gbif.org/occurrence/search?q=" +
-    encodeURIComponent((d.species[0] || {}).name || "Galapagos");
-  sizeTank(); restock(); renderNote(); renderGrid();
+  sizeTank(); restock(); renderGrid();
   drawMap(); drawNm();
   step(0);
   if (REDUCED) drawTank();
@@ -1662,16 +1698,16 @@ function applyLang() {
     var v = T[el.getAttribute("data-i18n")];
     if (v != null) el.textContent = v;
   });
-  $("gloss").textContent = T.gloss;
   $("foot").textContent = T.foot;
   mapC.setAttribute("aria-label", T.maparia);
   $("lang-en").setAttribute("aria-pressed", lang === "en");
   $("lang-es").setAttribute("aria-pressed", lang === "es");
-  $("maplegend").innerHTML = ["Western", "Elizabeth", "Northern", "CSouthEastern"].map(function (r) {
-    var s = G.sites.filter(function (x) { return x.region === r; })[0];
-    return '<span><i style="background:' + (s ? s.col : "#888") + '"></i>' + (T.reg[r] || r) + "</span>";
-  }).join("");
-  if (sel) { renderNote(); renderGrid();
+  $("maplegend").innerHTML = '<span class="leglab">' + T.biolab + "</span>" +
+    ["Western", "Elizabeth", "Northern", "CSouthEastern"].map(function (r) {
+      var s = G.sites.filter(function (x) { return x.region === r; })[0];
+      return '<span><i style="background:' + (s ? s.col : "#888") + '"></i>' + (T.reg[r] || r) + "</span>";
+    }).join("");
+  if (sel) { renderGrid();
     var s = siteBy[sel];
     $("sh-meta").textContent = s.island + " · " + (T.reg[s.region] || s.region) + " · " + s.date; }
 }
